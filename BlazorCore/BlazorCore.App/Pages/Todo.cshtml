@@ -1,0 +1,59 @@
+﻿@page "/todo"
+@inject AppDbContext AppDbContext
+@inject HttpClient Http
+
+@{
+    PageLoad();
+}
+
+<h1>Todo (@TodoItems.Where(todo => !todo.IsDone).Count())</h1>
+
+<ul>
+    @foreach (var todo in TodoItems)
+    {
+        <li>
+            <input type="checkbox" bind="@todo.IsDone" />
+            <input bind="@todo.Title" />
+        </li>
+    }
+</ul>
+
+<input placeholder="Something todo" bind="@newTodo" />
+<button onclick="@AddTodo">Add todo</button>
+
+@functions {
+    IList<TodoItem> TodoItems = new List<TodoItem>();
+    string newTodo;
+
+    //private async Task Refresh()
+    //{
+    //    TodoItems = await Http.GetJsonAsync<TodoItem[]>("/api/todo");
+    //    StateHasChanged();
+    //}
+
+    void PageLoad()
+    {
+        TodoItems = AppDbContext.TodoItems.ToList();
+    }
+
+    void AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            var newTodoItem = new TodoItem
+            {
+                Title = newTodo,
+
+
+            };
+            TodoItems.Add(newTodoItem);
+
+            AppDbContext.TodoItems.Add(newTodoItem);
+            AppDbContext.SaveChanges();
+
+            newTodo = string.Empty;
+
+        }
+
+    }
+}
